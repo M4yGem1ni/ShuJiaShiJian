@@ -49,22 +49,25 @@ const publicDir = (process as any).pkg
   ? path.join(path.dirname(process.execPath), "public")
   : path.join(__dirname, "../public");
 
-if (process.env.NODE_ENV === "production" && fs.existsSync(publicDir)) {
+const indexPath = path.join(publicDir, "index.html");
+if (fs.existsSync(indexPath)) {
   console.log(`Serving static files from ${publicDir}`);
   app.use(express.static(publicDir));
 
-  // SPA fallback: serve index.html for all non-API routes
-  app.get("/{*path}", (_req, res) => {
-    const indexPath = path.join(publicDir, "index.html");
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(indexPath);
+  // SPA fallback: serve index.html for all non-API, non-static GET requests
+  app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api/")) {
+      res.sendFile(indexPath, (err) => {
+        if (err) next();
+      });
     } else {
-      res.status(404).json({ message: "Not found" });
+      next();
     }
   });
 } else {
-  console.log("Development mode: static files not served by backend");
+  console.log(`Static files not found at ${publicDir}, skipping (dev mode ok)`);
 }
+
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
