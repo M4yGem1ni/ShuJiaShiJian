@@ -1,7 +1,7 @@
 {
   "name": "shujiashijian-backend",
   "version": "1.0.0",
-  "description": "浙江省线上扶贫募捐平台 - 后端",
+  "description": "\u6d59\u6c5f\u7701\u7ebf\u4e0a\u6276\u8d2b\u52df\u6350\u5e73\u53f0 - \u540e\u7aef",
   "type": "commonjs",
   "scripts": {
     "dev": "tsx watch src/app.ts",
@@ -13,7 +13,11 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "setup": "prisma db push && tsx prisma/seed.ts",
-    "release": "cd ../frontend && npm run build && cd ../backend && cp -r ../frontend/dist/* public/ && npm run build && echo 'Release build complete'"
+    "release": "cd ../frontend && npm run build && cd ../backend && cp -r ../frontend/dist/* public/ && npm run build && echo 'Release build complete'",
+    "pkg:linux-x64": "npx pkg . --target node22-linux-x64 --output ../shujiashijian-linux-x64",
+    "pkg:linux-arm64": "npx pkg . --target node22-linux-arm64 --output ../shujiashijian-linux-arm64",
+    "pkg:darwin-x64": "npx pkg . --target node22-darwin-x64 --output ../shujiashijian-darwin-x64",
+    "pkg:darwin-arm64": "npx pkg . --target node22-darwin-arm64 --output ../shujiashijian-darwin-arm64"
   },
   "keywords": [],
   "author": "",
@@ -28,9 +32,21 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.15.0",
+    "@yao-pkg/pkg": "^6.21.0",
     "prisma": "^6.6.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
+  },
+  "pkg": {
+    "scripts": [
+      "dist/**/*.js"
+    ],
+    "assets": [
+      "prisma/**/*",
+      "public/**/*",
+      ".env.example"
+    ],
+    "outputPath": "."
   }
 }

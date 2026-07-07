@@ -1,4 +1,9 @@
-name: CI Build & Release
+# CI Build & Release Pipeline
+# 1) build      - validates the project compiles (every push/PR)
+# 2) package    - builds standalone executables via pkg (push to main only)
+# 3) release    - publishes all artifacts to GitHub Releases (push to main only)
+
+name: "CI Build & Release"
 
 on:
   push:
@@ -6,20 +11,29 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # ----------------------------------------------------------------
+  # Step 1: Verify the project builds correctly
+  # ----------------------------------------------------------------
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: "npm"
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
-      # ---------- Backend ----------
+      # Backend
       - name: Install backend dependencies
         run: cd backend && npm ci
 
@@ -29,59 +43,135 @@ jobs:
       - name: Build backend (TypeScript)
         run: cd backend && npm run build
 
-      # ---------- Frontend ----------
+      # Frontend
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
       - name: Build frontend (Vite)
         run: cd frontend && npm run build
 
-      # ---------- Prepare Release ----------
+      # Copy frontend into backend for static serving
       - name: Copy frontend build into backend
         run: |
           mkdir -p backend/public
           cp -r frontend/dist/* backend/public/
 
-      - name: Initialize database & seed demo data
+  # ----------------------------------------------------------------
+  # Step 2: Build standalone executables via pkg (main branch only)
+  # ----------------------------------------------------------------
+  package:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build]
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            target: linux-x64
+            pkg-target: node22-linux-x64
+          - runner: ubuntu-24.04-arm
+            target: linux-arm64
+            pkg-target: node22-linux-arm64
+          - runner: macos-13
+            target: darwin-x64
+            pkg-target: node22-darwin-x64
+          - runner: macos-latest
+            target: darwin-arm64
+            pkg-target: node22-darwin-arm64
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # Backend
+      - name: Install backend dependencies
+        run: cd backend && npm ci
+
+      - name: Generate Prisma client
+        run: cd backend && npx prisma generate
+
+      - name: Build backend (TypeScript)
+        run: cd backend && npm run build
+
+      # Frontend
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Build frontend (Vite)
+        run: cd frontend && npm run build
+
+      # Copy frontend into backend
+      - name: Copy frontend build into backend
+        run: |
+          mkdir -p backend/public
+          cp -r frontend/dist/* backend/public/
+
+      # Package executable with pkg
+      - name: Build standalone executable
         run: |
           cd backend
-          cp .env.example .env
-          npx prisma db push
-          node --import tsx prisma/seed.ts
+          npx pkg . --target ${{ matrix.pkg-target }} --output ../shujiashijian-${{ matrix.target }}
 
-      - name: Assemble release package
-        run: |
-          RELEASE_DIR="shujiashijian-release"
-          mkdir -p "$RELEASE_DIR"
-
-          cp -r backend/dist "$RELEASE_DIR/server"
-          cp -r backend/public "$RELEASE_DIR/public"
-          cp -r backend/prisma "$RELEASE_DIR/prisma"
-          cp -r backend/node_modules "$RELEASE_DIR/node_modules"
-          cp backend/package.json "$RELEASE_DIR/"
-          cp backend/.env.example "$RELEASE_DIR/.env"
-          cp README.md "$RELEASE_DIR/" 2>/dev/null || true
-
-          # Create start.sh (avoid YAML flow mapping conflict with { })
-          printf '\043!/usr/bin/env bash\n' > "$RELEASE_DIR/start.sh"
-          printf 'set -e\n' >> "$RELEASE_DIR/start.sh"
-          printf 'cd "$(dirname "$0")"\n' >> "$RELEASE_DIR/start.sh"
-          printf 'echo "============================================"\n' >> "$RELEASE_DIR/start.sh"
-          printf 'echo "  ZheJiang Digital Charity Platform"\n' >> "$RELEASE_DIR/start.sh"
-          printf 'echo "============================================"\n' >> "$RELEASE_DIR/start.sh"
-          printf 'if [ ! -f .env ]; then\n' >> "$RELEASE_DIR/start.sh"
-          printf '  cp .env.example .env\n' >> "$RELEASE_DIR/start.sh"
-          printf 'fi\n' >> "$RELEASE_DIR/start.sh"
-          printf 'echo "Starting server..."\n' >> "$RELEASE_DIR/start.sh"
-          printf 'NODE_ENV=production node server/app.js\n' >> "$RELEASE_DIR/start.sh"
-
-          chmod +x "$RELEASE_DIR/start.sh"
-
-          tar -czf shujiashijian-release.tar.gz "$RELEASE_DIR/"
-
-      - name: Upload release artifact
+      # Upload executable as CI artifact
+      - name: Upload executable artifact
         uses: actions/upload-artifact@v7
         with:
-          name: shujiashijian-release
-          path: shujiashijian-release.tar.gz
+          name: executable-${{ matrix.target }}
+          path: shujiashijian-${{ matrix.target }}
           retention-days: 30
+
+  # ----------------------------------------------------------------
+  # Step 3: Publish GitHub Release (main branch only)
+  # ----------------------------------------------------------------
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [package]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download all executables
+        uses: actions/download-artifact@v7
+        with:
+          path: release-artifacts
+
+      - name: List artifacts
+        run: find release-artifacts -type f -ls
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "Build ${{ github.run_number }}"
+          body: |
+            ## 浙江数字公益扶贫平台 - 自动构建
+            
+            ### 构建信息
+            - Commit: ${{ github.sha }}
+            - Build: ${{ github.run_number }}
+            - Date: ${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}
+            
+            ### 下载说明
+            - **shujiashijian-linux-x64**: Linux x86_64 可执行文件
+            - **shujiashijian-linux-arm64**: Linux ARM64 可执行文件
+            - **shujiashijian-darwin-x64**: macOS Intel 可执行文件
+            - **shujiashijian-darwin-arm64**: macOS Apple Silicon 可执行文件
+            
+            ### 运行方式
+            1. 下载对应平台的可执行文件
+            2. `chmod +x shujiashijian-*`
+            3. `./shujiashijian-*`
+            4. 浏览器打开 http://localhost:3001
+          files: release-artifacts/**/shujiashijian-*
+          generate_release_notes: false
+          fail_on_unmatched_files: true
