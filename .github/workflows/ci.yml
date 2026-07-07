@@ -117,6 +117,7 @@ jobs:
 
       # Package executable with pkg (explicit entry path avoids @yao-pkg/pkg v6 bin requirement)
       - name: Build standalone executable
+        shell: bash
         run: |
           cd backend
           node node_modules/@yao-pkg/pkg/lib-es5/bin.js \
