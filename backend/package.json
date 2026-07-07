@@ -43,10 +43,15 @@
       "dist/**/*.js"
     ],
     "assets": [
+      "node_modules/.prisma/client/*.dylib",
+      "node_modules/prisma/**/*",
+      "node_modules/.prisma/client/*.node",
       "prisma/**/*",
-      "public/**/*",
-      ".env.example"
-    ],
-    "outputPath": "."
-  }
+      "node_modules/@prisma/client/**/*",
+      ".env.example",
+      "node_modules/.prisma/client/*.so",
+      "public/**/*"
+    ]
+  },
+  "main": "dist/app.js"
 }

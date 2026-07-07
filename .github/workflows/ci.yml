@@ -117,7 +117,7 @@ jobs:
       - name: Build standalone executable
         run: |
           cd backend
-          npx pkg . --target ${{ matrix.pkg-target }} --output ../shujiashijian-${{ matrix.target }}
+          ./node_modules/.bin/pkg . --target ${{ matrix.pkg-target }} --output ../shujiashijian-${{ matrix.target }}
 
       # Upload executable as CI artifact
       - name: Upload executable artifact
