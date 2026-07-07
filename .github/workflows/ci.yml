@@ -91,31 +91,59 @@ jobs:
             backend/package-lock.json
             frontend/package-lock.json
 
-      # Backend
+      # Backend deps first
       - name: Install backend dependencies
         run: cd backend && npm ci
 
-      - name: Generate Prisma client
-        run: cd backend && npx prisma generate
-
-      - name: Build backend (TypeScript)
-        run: cd backend && npm run build
-
-      # Frontend
+      # Frontend deps & build
       - name: Install frontend dependencies
         run: cd frontend && npm ci
 
       - name: Build frontend (Vite)
         run: cd frontend && npm run build
 
-      # Copy frontend into backend
+      # Copy frontend dist into backend/public
       - name: Copy frontend build into backend
         shell: bash
         run: |
           mkdir -p backend/public
           cp -r frontend/dist/* backend/public/
 
-      # Package executable with pkg (explicit entry path avoids @yao-pkg/pkg v6 bin requirement)
+      # Prepare database (push schema + seed data) — creates prisma/dev.db
+      - name: Generate Prisma client
+        run: cd backend && npx prisma generate
+
+      - name: Push database schema & seed
+        run: |
+          cd backend
+          npx prisma db push
+          npx tsx prisma/seed.ts
+
+      # Dump SQL schema for auto-initialization fallback
+      - name: Dump SQL schema
+        shell: bash
+        run: |
+          cd backend
+          if command -v sqlite3 &> /dev/null; then
+            sqlite3 prisma/dev.db .schema > prisma/schema.sql
+            echo "SQL schema dumped to prisma/schema.sql"
+          else
+            echo "sqlite3 not available, embedding schema dump will be skipped"
+          fi
+
+      # Copy dev.db to backend root (embed-assets.js searches both locations)
+      - name: Copy database for embedding
+        run: cp backend/prisma/dev.db backend/dev.db
+
+      # Run embed-assets.js to generate static-assets.ts with all assets + db embedded
+      - name: Embed assets into generated/static-assets.ts
+        run: cd backend && node scripts/embed-assets.js
+
+      # Build backend TypeScript (compiles the freshly generated static-assets.ts)
+      - name: Build backend (TypeScript)
+        run: cd backend && npm run build
+
+      # Package executable with pkg
       - name: Build standalone executable
         shell: bash
         run: |

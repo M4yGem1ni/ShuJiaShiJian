@@ -229,7 +229,7 @@ app.use((req, res, next) => {
   // 1. Try embedded assets first (safe in pkg mode, avoids fs crashes)
   //    When resolvedPublicDir is empty (pkg mode), assetRelPath = reqPath directly.
   const assetRelPath = resolvedPublicDir
-    ? path.relative(resolvedPublicDir, path.resolve(resolvedPublicDir, reqPath))
+    ? path.relative(resolvedPublicDir, path.join(resolvedPublicDir, reqPath))
     : reqPath.replace(/^\//, "");
   const fileAsset = getAsset(assetRelPath);
   if (fileAsset) {

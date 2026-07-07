@@ -21,7 +21,7 @@
           </template>
           <template v-else>
             <el-button size="small" @click="showLogin=true">登录</el-button>
-            <el-button type="primary" size="small" @click="showLogin=true">注册</el-button>
+            <el-button type="primary" size="small" @click="goRegister">注册</el-button>
           </template>
         </div>
       </div>
@@ -102,20 +102,21 @@
     <el-dialog v-model="showLogin" title="登录" width="400px">
       <el-form :model="loginForm" label-width="80px">
         <el-form-item label="手机号">
-          <el-input v-model="loginForm.phone" placeholder="演示账号: donor / org / admin" />
+          <el-input v-model="loginForm.phone" placeholder="手机号" />
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="loginForm.password" type="password" placeholder="统一密码: 123456" />
+          <el-input v-model="loginForm.password" type="password" placeholder="密码" />
         </el-form-item>
       </el-form>
+      <div style="text-align:center;margin-top:8px;">
+        <span style="font-size:0.85rem;color:#909399;">还没有账号？</span>
+        <el-button text size="small" @click="goRegister">立即注册</el-button>
+      </div>
       <template #footer>
         <el-button @click="showLogin=false">取消</el-button>
         <el-button type="primary" @click="handleLogin">登录</el-button>
       </template>
-      <div style="padding: 12px; background: #f5f7fa; border-radius: 4px; font-size: 0.82rem; color: #909399;">
-        <p>演示账号：donor / org / admin</p>
-        <p>统一密码：123456</p>
-      </div>
+
     </el-dialog>
   </div>
 </template>
@@ -129,7 +130,7 @@ import type { Project, AdminStats } from '../api'
 
 const router = useRouter()
 const showLogin = ref(false)
-const loginForm = ref({ phone: 'donor', password: '123456' })
+const loginForm = ref({ phone: '', password: '' })
 const currentUser = ref<any>(null)
 const featuredProjects = ref<Project[]>([])
 const stats = ref<AdminStats>({
@@ -186,6 +187,12 @@ const handleLogin = async () => {
   } catch (e: any) {
     ElMessage.error(e?.response?.data?.message || '登录失败')
   }
+}
+
+
+const goRegister = () => {
+  showLogin.value = false
+  router.push('/register')
 }
 
 const logout = () => {

@@ -99,9 +99,13 @@ export interface AdminStats {
   pendingFeedbacks: number
 }
 
+
 // Auth
 export const login = (phone: string, password: string) =>
   api.post('/auth/login', { phone, password }).then(r => r.data)
+
+export const register = (name: string, phone: string, password: string) =>
+  api.post('/auth/register', { name, phone, password }).then(r => r.data)
 
 export const getCurrentUser = () => api.get('/auth/me').then(r => r.data)
 

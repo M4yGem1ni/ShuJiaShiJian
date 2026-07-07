@@ -4,10 +4,10 @@
       <h2 style="text-align:center;margin-bottom:24px;">后台管理登录</h2>
       <el-form :model="form" label-width="0">
         <el-form-item>
-          <el-input v-model="form.phone" placeholder="管理员账号: admin" size="large" />
+          <el-input v-model="form.phone" placeholder="管理员账号" size="large" />
         </el-form-item>
         <el-form-item>
-          <el-input v-model="form.password" type="password" placeholder="密码: 123456" size="large" show-password />
+          <el-input v-model="form.password" type="password" placeholder="密码" size="large" show-password />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" @click="handleLogin" :loading="loading" style="width:100%">登录</el-button>
@@ -27,7 +27,7 @@ import { login } from '../../api'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
-const form = ref({ phone: 'admin', password: '123456' })
+const form = ref({ phone: '', password: '' })
 const loading = ref(false)
 
 const handleLogin = async () => {

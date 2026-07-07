@@ -20,12 +20,9 @@
           </el-col>
         </el-row>
 
-        <h3>技术架构</h3>
-        <p style="line-height:1.8;color:#606266;margin:12px 0;">
-          本系统采用前后端分离架构。前端基于 Vue 3 + Vite + TypeScript + Element Plus + ECharts 实现，后端基于 Node.js + Express + TypeScript + Prisma + SQLite 构建。系统通过 RESTful API 连接前后端，实现完整的扶贫项目发布、模拟捐赠、资金流向追踪和后台管理功能。
-        </p>
+        <h3>系统说明</h3>
         <p style="line-height:1.8;color:#909399;font-size:0.9rem;margin-top:8px;">
-          本系统为课程演示系统，不涉及真实资金交易和身份认证。
+          本系统为课程演示系统，不涉及真实资金交易和身份认证。所有捐赠数据均为模拟数据，仅用于功能演示。
         </p>
       </el-card>
     </div>

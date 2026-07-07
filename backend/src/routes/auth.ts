@@ -21,6 +21,28 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 });
 
+
+// POST /api/auth/register
+router.post("/register", async (req: Request, res: Response) => {
+  try {
+    const { name, phone, password } = req.body;
+    if (!name || !phone || !password) {
+      return res.status(400).json({ message: "请填写所有必填字段" });
+    }
+    const existing = await prisma.user.findUnique({ where: { phone } });
+    if (existing) {
+      return res.status(409).json({ message: "该手机号已被注册" });
+    }
+    const user = await prisma.user.create({
+      data: { name, phone, password, role: "donor" },
+    });
+    const { password: _, ...userInfo } = user;
+    res.json({ user: userInfo, token: `demo-token-${user.id}` });
+  } catch (error) {
+    res.status(500).json({ message: "注册失败", error });
+  }
+});
+
 // GET /api/auth/me
 router.get("/me", async (req: Request, res: Response) => {
   const userId = parseInt(req.headers["x-user-id"] as string);

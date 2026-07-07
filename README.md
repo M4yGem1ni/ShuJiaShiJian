@@ -11,37 +11,15 @@
 - **资金不透明** → 资金流向时间线、凭证公开
 - **可持续运营** → 项目反馈、数据看板、激励机制
 
-## 技术栈
-
-| 层次 | 技术 |
-|------|------|
-| 前端 | Vue 3 + Vite + TypeScript + Element Plus + ECharts |
-| 后端 | Node.js + Express + TypeScript + Prisma |
-| 数据库 | SQLite |
-| CI | GitHub Actions |
-
 ## 项目结构
 
 ```
 ShuJiaShiJian/
-├── frontend/          # Vue 3 前端项目
-│   ├── src/
-│   │   ├── views/     # 页面组件
-│   │   ├── router/    # 路由配置
-│   │   ├── api/       # API 客户端
-│   │   └── stores/    # Pinia 状态管理
-│   └── ...
-├── backend/           # Express 后端项目
-│   ├── src/
-│   │   ├── routes/    # API 路由
-│   │   ├── controllers/
-│   │   └── services/
-│   ├── prisma/        # 数据模型 & 种子数据
-│   └── ...
-├── plan.md            # 实施计划
-├── goal.md            # 项目目标
-├── release.sh         # 本地打包发布脚本
-└── .github/workflows/ci.yml  # CI 配置
+  ├── frontend/          # 前端项目
+  ├── backend/           # 后端项目
+  ├── docs/              # 文档
+  ├── release.sh         # 本地打包发布脚本
+  └── .github/workflows/ci.yml  # CI 配置
 ```
 
 ## 快速开始
@@ -70,11 +48,7 @@ npm run dev   # http://localhost:5173
 
 ### 演示账号
 
-| 角色 | 账号 | 密码 |
-|------|------|------|
-| 捐赠用户 | donor | 123456 |
-| 公益组织 | org | 123456 |
-| 管理员 | admin | 123456 |
+演示账号信息请参见 [docs/accounts.md](docs/accounts.md).
 
 ### 打包发布
 
