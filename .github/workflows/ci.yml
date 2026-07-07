@@ -114,15 +114,12 @@ jobs:
           cp -r frontend/dist/* backend/public/
 
       # Package executable with pkg
+      # Note: pkg v6 requires a bin field in package.json OR a direct file path
       - name: Build standalone executable
         run: |
-          set -x
           cd backend
-          echo "=== Checking pkg binary ==="
-          ls -la node_modules/.bin/pkg
-          node node_modules/@yao-pkg/pkg/lib-es5/bin.js --version
-          echo "=== Building executable ==="
-          node node_modules/@yao-pkg/pkg/lib-es5/bin.js . \
+          node node_modules/@yao-pkg/pkg/lib-es5/bin.js \
+            dist/app.js \
             --target ${{ matrix.pkg-target }} \
             --output ../shujiashijian-${{ matrix.target }}
 
