@@ -1,0 +1,91 @@
+name: CI Build & Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # ---------- Backend ----------
+      - name: Install backend dependencies
+        run: cd backend && npm ci
+
+      - name: Generate Prisma client
+        run: cd backend && npx prisma generate
+
+      - name: Build backend (TypeScript)
+        run: cd backend && npm run build
+
+      # ---------- Frontend ----------
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Build frontend (Vite)
+        run: cd frontend && npm run build
+
+      # ---------- Prepare Release ----------
+      - name: Copy frontend build into backend
+        run: |
+          mkdir -p backend/public
+          cp -r frontend/dist/* backend/public/
+
+      - name: Initialize database & seed demo data
+        run: |
+          cd backend
+          cp .env.example .env
+          npx prisma db push
+          npx tsx prisma/seed.ts
+
+      - name: Assemble release package
+        run: |
+          RELEASE_DIR="shujiashijian-release"
+          mkdir -p "$RELEASE_DIR"
+          # Compiled backend server
+          cp -r backend/dist "$RELEASE_DIR/server"
+          # Frontend static files
+          cp -r backend/public "$RELEASE_DIR/public"
+          # Prisma schema + seeded database
+          cp -r backend/prisma "$RELEASE_DIR/prisma"
+          # Dependencies (with devDeps for prisma/tsx at deploy time)
+          cp -r backend/node_modules "$RELEASE_DIR/node_modules"
+          # Config files
+          cp backend/package.json "$RELEASE_DIR/"
+          cp backend/.env.example "$RELEASE_DIR/.env"
+          cp README.md "$RELEASE_DIR/" 2>/dev/null || true
+          # Start script
+          cat > "$RELEASE_DIR/start.sh" << 'SCRIPT'
+#!/usr/bin/env bash
+set -e
+cd "$(dirname "$0")"
+echo "============================================"
+echo "  浙江数字公益扶贫平台"
+echo "============================================"
+if [ ! -f .env ]; then
+  cp .env.example .env
+fi
+echo "Starting server..."
+NODE_ENV=production node server/app.js
+SCRIPT
+          chmod +x "$RELEASE_DIR/start.sh"
+          # Create archive
+          tar -czf shujiashijian-release.tar.gz "$RELEASE_DIR/"
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shujiashijian-release
+          path: shujiashijian-release.tar.gz
+          retention-days: 30

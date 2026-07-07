@@ -37,3 +37,8 @@ coverage/
 # Temp
 .tmp
 .temp
+
+# Release / CI artifacts
+release/
+*.tar.gz
+shujiashijian-release*/

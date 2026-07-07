@@ -61,7 +61,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { getUserDonations } from '../api'
 import { ElMessage } from 'element-plus'
-import { UserFilled, TrophyBase } from '@element-plus/icons-vue'
+import { TrophyBase } from '@element-plus/icons-vue'
 import HeaderBar from '../components/HeaderBar.vue'
 
 const user = ref<any>(null)

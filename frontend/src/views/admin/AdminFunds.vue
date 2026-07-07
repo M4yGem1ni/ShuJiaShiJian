@@ -9,7 +9,7 @@
       </el-table-column>
       <el-table-column prop="description" label="说明" min-width="200" />
       <el-table-column label="类型" width="100">
-        <template #default="s">{{ { received: '募集', verified: '审核', allocated: '拨付', used: '使用' }[s.row.type] || s.row.type }}</template>
+        <template #default="s">{{ ({ received: '募集', verified: '审核', allocated: '拨付', used: '使用' } as Record<string, string>)[s.row.type] || s.row.type }}</template>
       </el-table-column>
       <el-table-column label="状态" width="100">
         <template #default="s">

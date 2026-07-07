@@ -7,11 +7,13 @@
     "dev": "tsx watch src/app.ts",
     "build": "tsc",
     "start": "node dist/app.js",
+    "start:prod": "NODE_ENV=production node dist/app.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "setup": "prisma db push && tsx prisma/seed.ts"
+    "setup": "prisma db push && tsx prisma/seed.ts",
+    "release": "cd ../frontend && npm run build && cd ../backend && cp -r ../frontend/dist/* public/ && npm run build && echo 'Release build complete'"
   },
   "keywords": [],
   "author": "",

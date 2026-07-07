@@ -43,7 +43,7 @@
     </el-table>
 
     <div style="text-align:center;margin-top:16px;">
-      <el-pagination v-model:current-page="page" :page-size="pageSize" :total="total" @current-change="p => { page = p; loadProjects() }" layout="prev, pager, next" />
+      <el-pagination v-model:current-page="page" :page-size="pageSize" :total="total" @current-change="handlePageChange" layout="prev, pager, next" />
     </div>
   </div>
 </template>
@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getAdminProjects, updateProjectStatus } from '../../api'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 const projects = ref<any[]>([])
 const loading = ref(false)
@@ -70,6 +70,11 @@ const loadProjects = async () => {
     total.value = res.total || 0
   } catch (e) { console.error(e) }
   loading.value = false
+}
+
+const handlePageChange = (p: number) => {
+  page.value = p
+  loadProjects()
 }
 
 const changeStatus = async (id: number, status: string) => {

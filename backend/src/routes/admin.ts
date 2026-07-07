@@ -67,7 +67,7 @@ router.patch("/projects/:id/status", async (req: Request, res: Response) => {
   try {
     const { status } = req.body;
     const project = await prisma.project.update({
-      where: { id: parseInt(req.params.id) },
+      where: { id: parseInt(req.params.id as string) },
       data: { status },
     });
     await prisma.auditLog.create({
@@ -127,7 +127,7 @@ router.patch("/feedbacks/:id/status", async (req: Request, res: Response) => {
   try {
     const { status } = req.body;
     const feedback = await prisma.feedback.update({
-      where: { id: parseInt(req.params.id) },
+      where: { id: parseInt(req.params.id as string) },
       data: { status },
     });
     res.json(feedback);

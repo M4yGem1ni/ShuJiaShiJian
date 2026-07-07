@@ -32,7 +32,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const project = await prisma.project.findUnique({
-      where: { id: parseInt(req.params.id) },
+      where: { id: parseInt(req.params.id as string) },
       include: {
         organization: { select: { id: true, name: true } },
         fundFlows: { orderBy: { createdAt: "asc" } },
@@ -50,7 +50,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 router.get("/:id/fund-flows", async (req: Request, res: Response) => {
   try {
     const flows = await prisma.fundFlow.findMany({
-      where: { projectId: parseInt(req.params.id) },
+      where: { projectId: parseInt(req.params.id as string) },
       orderBy: { createdAt: "asc" },
     });
     res.json(flows);
@@ -63,7 +63,7 @@ router.get("/:id/fund-flows", async (req: Request, res: Response) => {
 router.get("/:id/feedbacks", async (req: Request, res: Response) => {
   try {
     const feedbacks = await prisma.feedback.findMany({
-      where: { projectId: parseInt(req.params.id) },
+      where: { projectId: parseInt(req.params.id as string) },
       orderBy: { createdAt: "desc" },
     });
     res.json(feedbacks);

@@ -30,7 +30,7 @@ router.post("/", async (req: Request, res: Response) => {
 router.get("/user/:userId", async (req: Request, res: Response) => {
   try {
     const donations = await prisma.donation.findMany({
-      where: { userId: parseInt(req.params.userId) },
+      where: { userId: parseInt(req.params.userId as string) },
       orderBy: { createdAt: "desc" },
       include: { project: { select: { id: true, title: true, region: true, category: true } } },
     });
