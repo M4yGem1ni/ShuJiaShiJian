@@ -146,7 +146,7 @@ router.get("/statistics/trends", async (_req: Request, res: Response) => {
 
     // Group by date
     const trends: Record<string, number> = {};
-    donations.forEach((d) => {
+    donations.forEach((d: { amount: number; createdAt: Date }) => {
       const date = d.createdAt.toISOString().split("T")[0];
       trends[date] = (trends[date] || 0) + d.amount;
     });
