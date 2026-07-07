@@ -52,7 +52,7 @@ const publicDir = (process as any).pkg
 const indexPath = path.join(publicDir, "index.html");
 if (fs.existsSync(indexPath)) {
   console.log(`Serving static files from ${publicDir}`);
-  app.use(express.static(publicDir));
+  app.use(express.static(publicDir, { dotfiles: "allow" }));
 
   // SPA fallback: serve index.html for all non-API, non-static GET requests
   app.use((req, res, next) => {
