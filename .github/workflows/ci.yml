@@ -53,34 +53,30 @@ jobs:
         run: |
           RELEASE_DIR="shujiashijian-release"
           mkdir -p "$RELEASE_DIR"
-          # Compiled backend server
+
           cp -r backend/dist "$RELEASE_DIR/server"
-          # Frontend static files
           cp -r backend/public "$RELEASE_DIR/public"
-          # Prisma schema + seeded database
           cp -r backend/prisma "$RELEASE_DIR/prisma"
-          # Dependencies (with devDeps for prisma/tsx at deploy time)
           cp -r backend/node_modules "$RELEASE_DIR/node_modules"
-          # Config files
           cp backend/package.json "$RELEASE_DIR/"
           cp backend/.env.example "$RELEASE_DIR/.env"
           cp README.md "$RELEASE_DIR/" 2>/dev/null || true
-          # Start script
-          cat > "$RELEASE_DIR/start.sh" << 'SCRIPT'
-#!/usr/bin/env bash
-set -e
-cd "$(dirname "$0")"
-echo "============================================"
-echo "  浙江数字公益扶贫平台"
-echo "============================================"
-if [ ! -f .env ]; then
-  cp .env.example .env
-fi
-echo "Starting server..."
-NODE_ENV=production node server/app.js
-SCRIPT
+
+          # Create start.sh (avoid YAML flow mapping conflict with { })
+          printf '\043!/usr/bin/env bash\n' > "$RELEASE_DIR/start.sh"
+          printf 'set -e\n' >> "$RELEASE_DIR/start.sh"
+          printf 'cd "$(dirname "$0")"\n' >> "$RELEASE_DIR/start.sh"
+          printf 'echo "============================================"\n' >> "$RELEASE_DIR/start.sh"
+          printf 'echo "  ZheJiang Digital Charity Platform"\n' >> "$RELEASE_DIR/start.sh"
+          printf 'echo "============================================"\n' >> "$RELEASE_DIR/start.sh"
+          printf 'if [ ! -f .env ]; then\n' >> "$RELEASE_DIR/start.sh"
+          printf '  cp .env.example .env\n' >> "$RELEASE_DIR/start.sh"
+          printf 'fi\n' >> "$RELEASE_DIR/start.sh"
+          printf 'echo "Starting server..."\n' >> "$RELEASE_DIR/start.sh"
+          printf 'NODE_ENV=production node server/app.js\n' >> "$RELEASE_DIR/start.sh"
+
           chmod +x "$RELEASE_DIR/start.sh"
-          # Create archive
+
           tar -czf shujiashijian-release.tar.gz "$RELEASE_DIR/"
 
       - name: Upload release artifact
