@@ -98,7 +98,7 @@ app.use((req, res, next) => {
   if (req.method !== "GET" && req.method !== "HEAD") return next();
   if (req.path.startsWith("/api/")) return next();
 
-  const indexPath = path.join(publicDir, "index.html");
+  const indexPath = path.join(publicDir!, "index.html");
 
   // Determine the file to serve, preventing path traversal
   const reqPath = req.path === "/" ? "/index.html" : req.path;
@@ -110,22 +110,7 @@ app.use((req, res, next) => {
   // Check if file exists and serve it via a read stream
   try {
     if (fs.statSync(safePath).isFile()) {
-      const ext = path.extname(safePath).toLowerCase();
-      const mimeTypes: Record<string, string> = {
-        ".html": "text/html; charset=utf-8",
-        ".js": "application/javascript; charset=utf-8",
-        ".css": "text/css; charset=utf-8",
-        ".json": "application/json; charset=utf-8",
-        ".svg": "image/svg+xml",
-        ".ico": "image/x-icon",
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".woff": "font/woff",
-        ".woff2": "font/woff2",
-      };
-      res.setHeader("Content-Type", mimeTypes[ext] || "application/octet-stream");
-      fs.createReadStream(safePath).pipe(res);
+      serveFile(safePath, res);
       return;
     }
   } catch {
@@ -135,13 +120,38 @@ app.use((req, res, next) => {
   // SPA fallback: serve index.html for unmatched paths
   try {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    fs.createReadStream(indexPath).pipe(res);
+    serveFile(indexPath, res);
   } catch {
     // Last resort: 404
     res.status(404).send("Not Found");
   }
 });
 
+
+function serveFile(filePath: string, res: express.Response): void {
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeTypes: Record<string, string> = {
+    ".html": "text/html; charset=utf-8",
+    ".js": "application/javascript; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".svg": "image/svg+xml",
+    ".ico": "image/x-icon",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2",
+  };
+  res.setHeader("Content-Type", mimeTypes[ext] || "application/octet-stream");
+  const stream = fs.createReadStream(filePath);
+  stream.on("error", () => {
+    if (!res.headersSent) {
+      res.status(404).send("Not Found");
+    }
+  });
+  stream.pipe(res);
+}
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
