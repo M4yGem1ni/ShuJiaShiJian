@@ -120,10 +120,7 @@ jobs:
         shell: bash
         run: |
           cd backend
-          node node_modules/@yao-pkg/pkg/lib-es5/bin.js \
-            dist/app.js \
-            --target ${{ matrix.pkg-target }} \
-            --output ../shujiashijian-${{ matrix.target }}
+          node node_modules/@yao-pkg/pkg/lib-es5/bin.js dist/app.js --target ${{ matrix.pkg-target }} --output ../shujiashijian-${{ matrix.target }}
 
       # Upload executable as CI artifact
       - name: Upload executable artifact
