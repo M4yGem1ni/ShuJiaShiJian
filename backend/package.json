@@ -13,7 +13,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "setup": "prisma db push && tsx prisma/seed.ts",
-    "pkg:prepare": "cd ../frontend && npm run build && cd ../backend && cp -r ../frontend/dist/* public/ && npm run build",
+    "pkg:prepare": "cd ../frontend && npm run build && cd ../backend && cp -r ../frontend/dist/* public/ && npx prisma db push && npx tsx prisma/seed.ts && cp prisma/dev.db dev.db && (sqlite3 prisma/dev.db .schema > prisma/schema.sql 2>/dev/null || echo '[pkg:prepare] sqlite3 not available, skipping schema dump') && node scripts/embed-assets.js && npm run build",
     "release": "npm run pkg:prepare && echo 'Release build complete'",
     "pkg:linux-x64": "npm run pkg:prepare && npx pkg dist/app.js --target node22-linux-x64 --output ../shujiashijian-linux-x64",
     "pkg:linux-arm64": "npm run pkg:prepare && npx pkg dist/app.js --target node22-linux-arm64 --output ../shujiashijian-linux-arm64",
