@@ -47,7 +47,7 @@ jobs:
           cd backend
           cp .env.example .env
           npx prisma db push
-          npx tsx prisma/seed.ts
+          node --import tsx prisma/seed.ts
 
       - name: Assemble release package
         run: |

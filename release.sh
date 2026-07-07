@@ -40,7 +40,7 @@ echo "[5/7] Initializing database..."
 cd backend
 cp .env.example .env 2>/dev/null || true
 npx prisma db push
-npx tsx prisma/seed.ts
+node --import tsx prisma/seed.ts
 cd ..
 
 # Step 6: Assemble release package
