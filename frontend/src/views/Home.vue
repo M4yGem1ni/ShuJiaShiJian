@@ -95,8 +95,7 @@
     </div>
 
     <footer class="footer">
-      <p>© 2026 浙江数字公益扶贫平台 - 课程设计项目</p>
-      <p style="margin-top: 8px; font-size: 0.78rem;">本系统为课程演示系统，不涉及真实资金交易</p>
+      <p>© 2026 浙江数字公益扶贫平台</p>
     </footer>
 
     <el-dialog v-model="showLogin" title="登录" width="400px">

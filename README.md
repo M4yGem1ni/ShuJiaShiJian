@@ -2,7 +2,7 @@
 
 ## 项目简介
 
-本项目是一个面向浙江省的线上扶贫募捐平台原型系统，作为课程小组作业展示使用。系统围绕浙江省数字公益与共同富裕主题，模拟政府、公益组织、捐赠用户、受助对象和平台管理员等多方角色，展示从扶贫项目发布、用户浏览捐赠、资金流向追踪、项目进展反馈到后台审核管理的完整闭环。
+本项目是一个面向浙江省的线上扶贫募捐平台原型系统。系统围绕浙江省数字公益与共同富裕主题，模拟政府、公益组织、捐赠用户、受助对象和平台管理员等多方角色，展示从扶贫项目发布、用户浏览捐赠、资金流向追踪、项目进展反馈到后台审核管理的完整闭环。
 
 ### 核心要点
 
@@ -11,18 +11,27 @@
 - **资金不透明** → 资金流向时间线、凭证公开
 - **可持续运营** → 项目反馈、数据看板、激励机制
 
-## 项目结构
+## 下载可执行文件
 
-```
-ShuJiaShiJian/
-  ├── frontend/          # 前端项目
-  ├── backend/           # 后端项目
-  ├── docs/              # 文档
-  ├── release.sh         # 本地打包发布脚本
-  └── .github/workflows/ci.yml  # CI 配置
+从 [GitHub Releases](https://github.com/M4yGem1ni/ShuJiaShiJian/releases) 页面下载对应平台的可执行文件：
+
+- `shujiashijian-linux-x64` — Linux x86_64
+- `shujiashijian-linux-arm64` — Linux ARM64
+- `shujiashijian-win-x64.exe` — Windows x86_64
+- `shujiashijian-darwin-arm64` — macOS Apple Silicon
+
+下载后直接运行：
+
+```bash
+chmod +x shujiashijian-*   # Linux/macOS
+./shujiashijian-*          # 或双击运行
 ```
 
-## 快速开始
+浏览器打开 http://localhost:3001 即可使用。
+
+首次运行会自动创建 SQLite 数据库并初始化演示数据。如需重置，删除运行目录下的 `dev.db` 后重启即可。
+
+## 开发环境
 
 ### 环境要求
 
@@ -50,21 +59,14 @@ npm run dev   # http://localhost:5173
 
 演示账号信息请参见 [docs/accounts.md](docs/accounts.md).
 
-### 打包发布
+## 项目结构
 
-```bash
-# 本地打包
-./release.sh
-# 输出: shujiashijian-release.tar.gz
 ```
-
-### 运行生产版本
-
-```bash
-tar -xzf shujiashijian-release.tar.gz
-cd shujiashijian-release
-./start.sh
-# 访问 http://localhost:3001
+ShuJiaShiJian/
+  ├── frontend/          # 前端项目（Vue 3 + Vite + TypeScript）
+  ├── backend/           # 后端项目（Express + Prisma + SQLite）
+  ├── docs/              # 文档
+  └── .github/workflows/ci.yml  # CI 配置
 ```
 
 ## 功能模块
@@ -85,15 +87,6 @@ cd shujiashijian-release
 - **反馈管理**: 项目反馈审核
 - **审核管理**: 统一审核入口
 
-## 演示流程（推荐）
-
-1. 打开首页，介绍平台目标与核心数据
-2. 进入项目列表，展示筛选功能
-3. 进入项目详情，展示筹款进度、资金流向、项目反馈
-4. 完成一笔模拟捐赠，展示即时反馈
-5. 查看用户中心，展示捐赠记录
-6. 进入后台，展示数据看板和项目审核流程
-
 ## 信任机制设计
 
 - **项目准入**: 管理员审核上线
@@ -102,6 +95,12 @@ cd shujiashijian-release
 - **用户激励**: 累计捐赠、公益证书
 - **风险提示**: 异常项目标记
 
-## License
+## CI / CD
 
-课程项目，仅用于教学演示。
+本项目使用 GitHub Actions 自动构建可执行文件。每次推送到 `main` 分支时，CI 会自动执行：
+
+1. **build** — 验证前后端编译通过
+2. **package** — 使用 `pkg` 在各平台编译独立可执行文件
+3. **release** — 将产物发布到 GitHub Releases
+
+构建产物可在 [Releases 页面](https://github.com/M4yGem1ni/ShuJiaShiJian/releases) 下载。
